@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 entity DisplayN is 
     port( 
         MAX10_CLK1_50:    in  std_logic;    -- 50MHz clock on the board 
+        CHAR:             in  integer;
         LEDR:             out std_logic_vector(9 downto 0); 
         GPIO:             out std_logic_vector(35 downto 0)
     ); 
@@ -21,17 +22,44 @@ begin
     process(counter(5))  -- Using a lower bit for a faster update rate
     begin
         if rising_edge(counter(5)) then
-            case column_index is
-                when 0 => row_driver <= "00000000"; -- First column (off)
-                when 1 => row_driver <= "11111110"; -- Second column (part of 'N')
-                when 2 => row_driver <= "00100000"; -- Third column (part of 'N')
-                when 3 => row_driver <= "00010000"; -- Fourth column (part of 'N')
-                when 4 => row_driver <= "00001000"; -- Fifth column (part of 'N')
-                when 5 => row_driver <= "11111110"; -- Sixth column (part of 'N')
-                when 6 => row_driver <= "00000000"; -- Seventh column (off)
-                when 7 => row_driver <= "00000000"; -- Eighth column (off)
-                when others => row_driver <= (others => '0');
-            end case;
+            case CHAR is 
+                when 65 => --A
+                    case column_index is
+                        when 0 => row_driver <= "00000000"; -- First column (off)
+                        when 1 => row_driver <= "11111100"; -- Second column (part of 'A')
+                        when 2 => row_driver <= "00100010"; -- Third column (part of 'A')
+                        when 3 => row_driver <= "00100001"; -- Fourth column (part of 'A')
+                        when 4 => row_driver <= "00100010"; -- Fifth column (part of 'A')
+                        when 5 => row_driver <= "11111100"; -- Sixth column (part of 'A')
+                        when 6 => row_driver <= "00000000"; -- Seventh column (off)
+                        when 7 => row_driver <= "00000000"; -- Eighth column (off)
+                        when others => row_driver <= (others => '0');
+                    end case;
+                when 78 => -- N
+                    case column_index is
+                        when 0 => row_driver <= "00000000"; -- First column (off)
+                        when 1 => row_driver <= "11111110"; -- Second column (part of 'N')
+                        when 2 => row_driver <= "00100000"; -- Third column (part of 'N')
+                        when 3 => row_driver <= "00010000"; -- Fourth column (part of 'N')
+                        when 4 => row_driver <= "00001000"; -- Fifth column (part of 'N')
+                        when 5 => row_driver <= "11111110"; -- Sixth column (part of 'N')
+                        when 6 => row_driver <= "00000000"; -- Seventh column (off)
+                        when 7 => row_driver <= "00000000"; -- Eighth column (off)
+                        when others => row_driver <= (others => '0');
+                    end case;
+                when others => -- random pattern for error
+                    case column_index is
+                        when 0 => row_driver <= "01010101";
+                        when 1 => row_driver <= "10101010";
+                        when 2 => row_driver <= "01010101";
+                        when 3 => row_driver <= "10101010";
+                        when 4 => row_driver <= "01010101";
+                        when 5 => row_driver <= "10101010";
+                        when 6 => row_driver <= "01010101";
+                        when 7 => row_driver <= "10101010";
+                        when others => row_driver <= (others => '0');
+                    end case;
+                end case;
 
             col_driver <= (others => '1');  -- Turns all columns off
             col_driver(column_index) <= '0';  -- Turns the current column on
